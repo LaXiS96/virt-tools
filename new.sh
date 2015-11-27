@@ -26,12 +26,6 @@ if [ -z "$HOST_ADDRESS" ]; then
   echo -n "Please enter the host's external IP address: "; read -e HOST_ADDRESS
 fi
 
-if [ ! -f "$HOME/.ssh/id_rsa" ]; then
-  echo -n "Generating SSH keypair..."
-  ssh-keygen -q -t rsa -N "" -f $HOME/.ssh/id_rsa
-  echo " done!"
-fi
-
 echo -e "Creating container \"$CONTAINER_NAME\"..."
 
 $SUDO lxc-create -t download -n "$CONTAINER_NAME" -- -d ubuntu -r trusty -a amd64
@@ -45,10 +39,14 @@ if [ ! -d "$CONTAINER_DIR" ]; then
   echo -e "FATAL: could not find container directory at \"$CONTAINER_DIR\"."; exit 1
 fi
 
+if [ ! -f "$HOME/.ssh/id_rsa" ]; then
+  echo -n "Generating SSH keypair..."
+  ssh-keygen -q -t rsa -N "" -f $HOME/.ssh/id_rsa
+  echo " done!"
+fi
 $SUDO mkdir -p $CONTAINER_ROOTFS/root/.ssh
 $SUDO chmod 700 $CONTAINER_ROOTFS/root/.ssh
 cat $HOME/.ssh/id_rsa.pub | $SUDO tee $CONTAINER_ROOTFS/root/.ssh/authorized_keys 1>/dev/null
-echo "$PUBLIC_KEY" | $SUDO tee -a $CONTAINER_ROOTFS/root/.ssh/authorized_keys 1>/dev/null
 $SUDO chmod 600 $CONTAINER_ROOTFS/root/.ssh/authorized_keys
 $SUDO chown -R 100000:100000 $CONTAINER_ROOTFS/root/.ssh
 
