@@ -62,7 +62,7 @@ $SUDO chown -R 100000:100000 $CONTAINER_ROOTFS/root/.ssh
 echo "Setting up container connectivity..."
 
 $SUDO sed -i "s/127.0.1.1\s\{0,\}$CONTAINER_NAME/$HOST_IP $CONTAINER_NAME.dedi.laxis.it $CONTAINER_NAME/" $CONTAINER_ROOTFS/etc/hosts
-$SUDO sed -i "s/iface eth0 inet dhcp/iface eth0 inet static\n    address $CONTAINER_IP\n    netmask 255.255.255.0\n    gateway 10.0.3.1\n    dns-nameserver 10.0.3.1\n    dns-search dedi.laxis.it/" $CONTAINER_ROOTFS/etc/network/interfaces
+$SUDO sed -i "s/iface eth0 inet dhcp/iface eth0 inet static\n    address $CONTAINER_ADDRESS\n    netmask 255.255.255.0\n    gateway 10.0.3.1\n    dns-nameserver 10.0.3.1\n    dns-search dedi.laxis.it/" $CONTAINER_ROOTFS/etc/network/interfaces
 
 $SUDO lxc-start -q -n "$CONTAINER_NAME" -d
 echo "Waiting 10 seconds for container to start..."
@@ -101,4 +101,4 @@ if [ "$?" != "0" ]; then
   echo "FATAL: errors while installing packages."; exit 1
 fi
 
-echo; echo -e "Done!\nYou can now access the container with: ssh root@$CONTAINER_IP"
+echo; echo -e "Done!\nYou can now access the container with: ssh root@$CONTAINER_ADDRESS"
