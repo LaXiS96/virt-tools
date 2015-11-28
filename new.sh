@@ -1,5 +1,5 @@
 #!/bin/bash
-# If no release and arch arguments are passed, Ubuntu trusty am64 is assumed
+# If no release and arch arguments are passed, Ubuntu trusty amd64 is assumed
 
 SUDO="sudo"
 if [ "$(id -u)" = "0" ]; then
@@ -37,7 +37,7 @@ fi
 
 echo -e "Creating container \"$CONTAINER_NAME\"..."
 
-$SUDO lxc-create -t download -n "$CONTAINER_NAME" -- -d ubuntu -r trusty -a amd64
+$SUDO lxc-create -t download -n "$CONTAINER_NAME" -- -d ubuntu -r $CONTAINER_RELEASE -a $CONTAINER_ARCH
 if [ "$?" != "0" ]; then
   echo "FATAL: error while creating container."; exit 1
 fi
