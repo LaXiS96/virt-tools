@@ -1,6 +1,7 @@
 #!/bin/bash
-SUDO="sudo"
+# If no release and arch arguments are passed, Ubuntu trusty am64 is assumed
 
+SUDO="sudo"
 if [ "$(id -u)" = "0" ]; then
   SUDO=""
 fi
@@ -9,6 +10,8 @@ while [ $# -gt 1 ]; do
   case $1 in
     -n|--name) CONTAINER_NAME="$2"; shift;;
     -a|--address) CONTAINER_ADDRESS="$2"; shift;;
+    -r|--release) CONTAINER_RELEASE="$2"; shift;;
+    -c|--arch) CONTAINER_ARCH="$2"; shift;;
   esac
   shift
 done
@@ -18,6 +21,12 @@ if [ -z "$CONTAINER_NAME" ]; then
 fi
 if [ -z "$CONTAINER_ADDRESS" ]; then
   echo "FATAL: missing container address. (specify with -a <#.#.#.#>)"; exit 1
+fi
+if [ -z "$CONTAINER_RELEASE" ]; then
+  CONTAINER_RELEASE="trusty"
+fi
+if [ -z "$CONTAINER_ARCH" ]; then
+  CONTAINER_ARCH="amd64"
 fi
 
 HOST_ADDRESS="$(wget -q -O- https://api.ipify.org/)"
