@@ -1,10 +1,5 @@
 #!/bin/bash
 
-SUDO="sudo"
-if [ "$(id -u)" = "0" ]; then
-  SUDO=""
-fi
-
 while [ $# -gt 1 ]; do
   case $1 in
     -n|--name) CONTAINER_NAME="$2"; shift;;
@@ -17,7 +12,12 @@ if [ -z "$CONTAINER_NAME" ]; then
 fi
 
 echo -e "Stopping container \"$CONTAINER_NAME\"..."
-$SUDO lxc-stop -n $CONTAINER_NAME
+sudo lxc-stop -n $CONTAINER_NAME
 echo -e "Destroying container \"$CONTAINER_NAME\"..."
-$SUDO lxc-destroy -n $CONTAINER_NAME
-echo "Done!"
+sudo lxc-destroy -n $CONTAINER_NAME
+
+if [ "$?" = "0" ]; then
+  echo "Done!"
+else
+  echo "Error!"
+fi
