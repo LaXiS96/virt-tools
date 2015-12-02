@@ -3,7 +3,7 @@
 while [ $# -gt 1 ]; do
   case $1 in
     -i|--interface) INTERFACE="$2"; shift;;
-    -a|--address) CONTAINER_ADDRESS="$2"; shift;;
+    -a|--address) ADDRESS="$2"; shift;;
     -hp|--host-port) HOST_PORT="$2"; shift;;
     -gp|--guest-port) GUEST_PORT="$2"; shift;;
     -t|--protocol) PROTOCOL="$2"; shift;;
