@@ -26,7 +26,7 @@ if [ -z "$PROTOCOL" ]; then
   echo "FATAL: missing protocol. (specify with -t <protocol>)"; exit 1
 fi
 
-echo -n "Forwarding ${PROTOCOL^^} host port $HOST_PORT to $ADDRESS:$GUEST_PORT on interface $INTERFACE. Correct? [Y/n] "
+echo -n "Forwarding ${PROTOCOL^^} host port $HOST_PORT to $ADDRESS:$GUEST_PORT. Correct? [Y/n] "
 YESNO=""; read -e YESNO
 case $YESNO in
   ""|[Yy])
