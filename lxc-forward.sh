@@ -2,7 +2,6 @@
 
 while [ $# -gt 1 ]; do
   case $1 in
-    -i|--interface) INTERFACE="$2"; shift;;
     -a|--address) ADDRESS="$2"; shift;;
     -hp|--host-port) HOST_PORT="$2"; shift;;
     -gp|--guest-port) GUEST_PORT="$2"; shift;;
@@ -10,10 +9,6 @@ while [ $# -gt 1 ]; do
   esac
   shift
 done
-
-if [ -z "$INTERFACE" ]; then
-  echo "FATAL: missing interface. (specify with -i <interface>)"; exit 1
-fi
 
 if [ -z "$ADDRESS" ]; then
   echo "FATAL: missing guest IP address. (specify with -a <address>)"; exit 1
@@ -35,7 +30,7 @@ echo -n "Forwarding ${PROTOCOL^^} host port $HOST_PORT to $ADDRESS:$GUEST_PORT o
 YESNO=""; read -e YESNO
 case $YESNO in
   ""|[Yy])
-    sudo iptables -t nat -A PREROUTING -i $INTERFACE -p $PROTOCOL --dport $HOST_PORT -j DNAT --to $ADDRESS:$GUEST_PORT
+    sudo iptables -t nat -A PREROUTING --protocol $PROTOCOL --dport $HOST_PORT -j DNAT --to-destination $ADDRESS:$GUEST_PORT
   ;;
 esac
 
