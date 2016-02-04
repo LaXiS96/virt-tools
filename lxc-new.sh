@@ -98,4 +98,4 @@ fi
 
 echo
 echo -e "Done!\nYou can now access the container with: ssh root@$CONTAINER_ADDRESS"
-echo -e "If you need global IPv6 access in your container, use \"ip -6 neigh add proxy <container-ipv6> dev <public-iface>\""
+echo -e "If you need global IPv6 access in your container, use \"ip -6 neigh add proxy <container-ipv6> dev <host-iface>\""
