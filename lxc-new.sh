@@ -107,4 +107,4 @@ fi
 
 echo
 echo -e "Done!\nYou can now access the container with: ssh root@$CONTAINER_ADDRESS"
-echo -e "If you need global IPv6 access in your container, look in $CONTAINER_DIR/pre-start.sh"
+echo -e "If you need global IPv6 access in your container, look in $CONTAINER_DIR/pre-start.sh and post-stop.sh"
