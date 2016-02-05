@@ -43,6 +43,11 @@ if [ ! -d "$CONTAINER_DIR" ]; then
   echo -e "FATAL: could not find container directory at \"$CONTAINER_DIR\"."; exit 1
 fi
 
+echo -e "#!/bin/bash\n# This script runs on the host before starting the container" > $CONTAINER_DIR/pre-start.sh
+echo -e "# IPv6 routing: ip -6 neigh add proxy <container-ipv6> dev <host-iface>" >> $CONTAINER_DIR/pre-start.sh
+chmod a+x $CONTAINER_DIR/pre-start.sh
+echo -e "\nlxc.hook.pre-start = $CONTAINER_DIR/pre-start.sh" >> $CONTAINER_DIR/config
+
 if [ ! -f "$HOME/.ssh/id_rsa" ]; then
   echo -n "Generating SSH keypair..."
   ssh-keygen -q -t rsa -N "" -f $HOME/.ssh/id_rsa
@@ -98,4 +103,4 @@ fi
 
 echo
 echo -e "Done!\nYou can now access the container with: ssh root@$CONTAINER_ADDRESS"
-echo -e "If you need global IPv6 access in your container, use \"ip -6 neigh add proxy <container-ipv6> dev <host-iface>\""
+echo -e "If you need global IPv6 access in your container, look in $CONTAINER_DIR/pre-start.sh"
