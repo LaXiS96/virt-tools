@@ -47,6 +47,10 @@ echo -e "#!/bin/bash\n# This script runs on the host before starting the contain
 echo -e "# IPv6 routing: ip -6 neigh add proxy <container-ipv6> dev <host-iface>" >> $CONTAINER_DIR/pre-start.sh
 chmod a+x $CONTAINER_DIR/pre-start.sh
 echo -e "\nlxc.hook.pre-start = $CONTAINER_DIR/pre-start.sh" >> $CONTAINER_DIR/config
+echo -e "#!/bin/bash\n# This script runs on the host after stopping the container" > $CONTAINER_DIR/pre-start.sh
+echo -e "# IPv6 routing: ip -6 neigh del proxy <container-ipv6> dev <host-iface>" >> $CONTAINER_DIR/pre-start.sh
+chmod a+x $CONTAINER_DIR/post-stop.sh
+echo -e "lxc.hook.post-stop = $CONTAINER_DIR/post-stop.sh" >> $CONTAINER_DIR/config
 
 if [ ! -f "$HOME/.ssh/id_rsa" ]; then
   echo -n "Generating SSH keypair..."
