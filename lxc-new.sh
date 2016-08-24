@@ -1,6 +1,11 @@
 #!/bin/bash
 # If no release and arch arguments are passed, Ubuntu trusty amd64 is assumed
 
+if [ "$(id -u)" != "0" ]; then
+  echo "Please run me as superuser!" 1>&2
+  exit 1
+fi
+
 while [ $# -gt 1 ]; do
   case $1 in
     -n|--name) CONTAINER_NAME="$2"; shift;;
@@ -32,7 +37,7 @@ fi
 
 echo -e "Creating container \"$CONTAINER_NAME\"..."
 
-sudo lxc-create -t download -n "$CONTAINER_NAME" -- -d ubuntu -r $CONTAINER_RELEASE -a $CONTAINER_ARCH
+lxc-create -t download -n "$CONTAINER_NAME" -- -d ubuntu -r $CONTAINER_RELEASE -a $CONTAINER_ARCH
 if [ "$?" != "0" ]; then
   echo "FATAL: error while creating container."; exit 1
 fi
@@ -57,50 +62,50 @@ if [ ! -f "$HOME/.ssh/id_rsa" ]; then
   ssh-keygen -q -t rsa -N "" -f $HOME/.ssh/id_rsa
   echo " done!"
 fi
-sudo mkdir -p $CONTAINER_ROOTFS/root/.ssh
-sudo chmod 700 $CONTAINER_ROOTFS/root/.ssh
-cat $HOME/.ssh/id_rsa.pub | sudo tee $CONTAINER_ROOTFS/root/.ssh/authorized_keys 1>/dev/null
-sudo chmod 600 $CONTAINER_ROOTFS/root/.ssh/authorized_keys
-sudo chown -R 100000:100000 $CONTAINER_ROOTFS/root/.ssh
+mkdir -p $CONTAINER_ROOTFS/root/.ssh
+chmod 700 $CONTAINER_ROOTFS/root/.ssh
+cat $HOME/.ssh/id_rsa.pub > $CONTAINER_ROOTFS/root/.ssh/authorized_keys
+chmod 600 $CONTAINER_ROOTFS/root/.ssh/authorized_keys
+chown -R 100000:100000 $CONTAINER_ROOTFS/root/.ssh
 
 echo "Setting up container connectivity..."
 
-sudo sed -i "s/127.0.1.1\s\{0,\}$CONTAINER_NAME/$HOST_ADDRESS $CONTAINER_NAME.s.laxis.it $CONTAINER_NAME/" $CONTAINER_ROOTFS/etc/hosts
-sudo sed -i "s/iface eth0 inet dhcp/iface eth0 inet static\n    address $CONTAINER_ADDRESS\n    netmask 255.255.255.0\n    gateway 10.6.1.254\n    dns-nameserver 8.8.8.8 8.8.4.4\n    dns-search s.laxis.it/" $CONTAINER_ROOTFS/etc/network/interfaces
+sed -i "s/127.0.1.1\s\{0,\}$CONTAINER_NAME/$HOST_ADDRESS $CONTAINER_NAME.s.laxis.it $CONTAINER_NAME/" $CONTAINER_ROOTFS/etc/hosts
+sed -i "s/iface eth0 inet dhcp/iface eth0 inet static\n    address $CONTAINER_ADDRESS\n    netmask 255.255.255.0\n    gateway 10.6.1.254\n    dns-nameserver 8.8.8.8 8.8.4.4\n    dns-search s.laxis.it/" $CONTAINER_ROOTFS/etc/network/interfaces
 
-sudo lxc-start -q -n "$CONTAINER_NAME" -d
+lxc-start -q -n "$CONTAINER_NAME" -d
 echo "Waiting 10 seconds for container to start..."
 sleep 10
 
 echo "Deleting user ubuntu (and his home)..."
 
-sudo lxc-attach -q -n $CONTAINER_NAME -- deluser ubuntu --remove-home 1>/dev/null
+lxc-attach -q -n $CONTAINER_NAME -- deluser ubuntu --remove-home 1>/dev/null
 if [ "$?" != "0" ]; then
   echo "NOTICE: could not delete user ubuntu..."
 fi
 
 echo "Setting up timezone..."
 
-sudo lxc-attach -q -n $CONTAINER_NAME -- rm -f /etc/localtime
-sudo lxc-attach -q -n $CONTAINER_NAME -- ln -s /usr/share/zoneinfo/CET /etc/localtime
+lxc-attach -q -n $CONTAINER_NAME -- rm -f /etc/localtime
+lxc-attach -q -n $CONTAINER_NAME -- ln -s /usr/share/zoneinfo/CET /etc/localtime
 
 echo "Checking container connectivity..."
 
-sudo lxc-attach -q -n $CONTAINER_NAME -- ping -A -c 4 -W 1 8.8.8.8 1>/dev/null
+lxc-attach -q -n $CONTAINER_NAME -- ping -A -c 4 -W 1 8.8.8.8 1>/dev/null
 if [ "$?" != "0" ]; then
   echo "FATAL: container does not seem to be able to access the Internet."; exit 1
 fi
 
 echo "Updating APT packages lists..."
 
-sudo lxc-attach -q -n $CONTAINER_NAME -- apt-get -qq update
+lxc-attach -q -n $CONTAINER_NAME -- apt-get -qq update
 if [ "$?" != "0" ]; then
   echo "FATAL: there was a problem updating APT packages lists."; exit 1
 fi
 
 echo "Installing useful packages..."
 
-sudo lxc-attach -q -n $CONTAINER_NAME -- apt-get -qq -y install openssh-server nano bash-completion software-properties-common 1>/dev/null
+lxc-attach -q -n $CONTAINER_NAME -- apt-get -qq -y install openssh-server nano bash-completion software-properties-common 1>/dev/null
 if [ "$?" != "0" ]; then
   echo "FATAL: errors while installing packages."; exit 1
 fi
