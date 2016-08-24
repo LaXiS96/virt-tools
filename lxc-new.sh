@@ -24,7 +24,7 @@ if [ -z "$CONTAINER_ARCH" ]; then
   CONTAINER_ARCH="amd64"
 fi
 
-HOST_ADDRESS="$(wget -q -O- https://api.ipify.org/)"
+HOST_ADDRESS="$(wget -q -O- http://ipinfo.io/ip/)"
 if [ -z "$HOST_ADDRESS" ]; then
   echo "NOTICE: could not retrieve host's external IP address."
   echo -n "Please enter the host's external IP address: "; read -e HOST_ADDRESS
@@ -65,8 +65,8 @@ sudo chown -R 100000:100000 $CONTAINER_ROOTFS/root/.ssh
 
 echo "Setting up container connectivity..."
 
-sudo sed -i "s/127.0.1.1\s\{0,\}$CONTAINER_NAME/$HOST_ADDRESS $CONTAINER_NAME.dedi.laxis.it $CONTAINER_NAME/" $CONTAINER_ROOTFS/etc/hosts
-sudo sed -i "s/iface eth0 inet dhcp/iface eth0 inet static\n    address $CONTAINER_ADDRESS\n    netmask 255.255.255.0\n    gateway 10.0.1.254\n    dns-nameserver 8.8.8.8 8.8.4.4\n    dns-search dedi.laxis.it/" $CONTAINER_ROOTFS/etc/network/interfaces
+sudo sed -i "s/127.0.1.1\s\{0,\}$CONTAINER_NAME/$HOST_ADDRESS $CONTAINER_NAME.s.laxis.it $CONTAINER_NAME/" $CONTAINER_ROOTFS/etc/hosts
+sudo sed -i "s/iface eth0 inet dhcp/iface eth0 inet static\n    address $CONTAINER_ADDRESS\n    netmask 255.255.255.0\n    gateway 10.6.1.254\n    dns-nameserver 8.8.8.8 8.8.4.4\n    dns-search s.laxis.it/" $CONTAINER_ROOTFS/etc/network/interfaces
 
 sudo lxc-start -q -n "$CONTAINER_NAME" -d
 echo "Waiting 10 seconds for container to start..."
