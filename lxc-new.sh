@@ -71,7 +71,7 @@ chown -R 100000:100000 $CONTAINER_ROOTFS/root/.ssh
 echo "Setting up container connectivity..."
 
 sed -i "s/127.0.1.1\s\{0,\}$CONTAINER_NAME/$HOST_ADDRESS $CONTAINER_NAME.s.laxis.it $CONTAINER_NAME/" $CONTAINER_ROOTFS/etc/hosts
-sed -i "s/iface eth0 inet dhcp/iface eth0 inet static\n    address $CONTAINER_ADDRESS\n    netmask 255.255.255.0\n    gateway 10.6.1.254\n    dns-nameserver 8.8.8.8 8.8.4.4\n    dns-search s.laxis.it/" $CONTAINER_ROOTFS/etc/network/interfaces
+sed -i "s/iface eth0 inet dhcp/iface eth0 inet static\n\taddress $CONTAINER_ADDRESS\n\tnetmask 255.255.255.0\n\tgateway 10.6.1.254\n\tdns-nameserver 8.8.8.8 8.8.4.4\n\tdns-search s.laxis.it/" $CONTAINER_ROOTFS/etc/network/interfaces
 
 lxc-start -q -n "$CONTAINER_NAME" -d
 echo "Waiting 10 seconds for container to start..."
