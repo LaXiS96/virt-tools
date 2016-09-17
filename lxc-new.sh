@@ -10,6 +10,7 @@ while [ $# -gt 1 ]; do
   case $1 in
     -n|--name) CONTAINER_NAME="$2"; shift;;
     -a|--address) CONTAINER_ADDRESS="$2"; shift;;
+    -g|--gateway) CONTAINER_GATEWAY="$2"; shift;;
     -r|--release) CONTAINER_RELEASE="$2"; shift;;
     -c|--arch) CONTAINER_ARCH="$2"; shift;;
   esac
@@ -21,6 +22,9 @@ if [ -z "$CONTAINER_NAME" ]; then
 fi
 if [ -z "$CONTAINER_ADDRESS" ]; then
   echo "FATAL: missing container address. (specify with -a <#.#.#.#>)"; exit 1
+fi
+if [ -z "$CONTAINER_GATEWAY" ]; then
+  echo "FATAL: missing container gateway. (specify with -g <#.#.#.#>)"; exit 1
 fi
 if [ -z "$CONTAINER_RELEASE" ]; then
   CONTAINER_RELEASE="trusty"
@@ -71,7 +75,7 @@ chown -R 100000:100000 $CONTAINER_ROOTFS/root/.ssh
 echo "Setting up container connectivity..."
 
 sed -i "s/127.0.1.1\s\{0,\}$CONTAINER_NAME/$HOST_ADDRESS $CONTAINER_NAME.s.laxis.it $CONTAINER_NAME/" $CONTAINER_ROOTFS/etc/hosts
-sed -i "s/iface eth0 inet dhcp/iface eth0 inet static\n\taddress $CONTAINER_ADDRESS\n\tnetmask 255.255.255.0\n\tgateway 10.5.1.254\n\tdns-nameservers 8.8.8.8 8.8.4.4\n\tdns-search s.laxis.it/" $CONTAINER_ROOTFS/etc/network/interfaces
+sed -i "s/iface eth0 inet dhcp/iface eth0 inet static\n\taddress $CONTAINER_ADDRESS\n\tnetmask 255.255.255.0\n\tgateway $CONTAINER_GATEWAY\n\tdns-nameservers 8.8.8.8 8.8.4.4\n\tdns-search s.laxis.it/" $CONTAINER_ROOTFS/etc/network/interfaces
 
 lxc-start -q -n "$CONTAINER_NAME" -d
 echo "Waiting 10 seconds for container to start..."
