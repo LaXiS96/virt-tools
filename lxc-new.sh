@@ -80,15 +80,16 @@ CONTAINER_IPV4="$IPV4_BASE$CONTAINER_LAST_OCTET"
 CONTAINER_IPV4_GATEWAY="$IPV4_BASE$IPV4_GATEWAY"
 CONTAINER_IPV6="$IPV6_BASE$(echo $CONTAINER_IPV4 | sed 's/\./:/g')"
 CONTAINER_IPV6_GATEWAY="$IPV6_BASE$IPV6_GATEWAY"
+
 sed -i "s/127.0.1.1\s\{0,\}$CONTAINER_NAME/$HOST_IPV4 $CONTAINER_NAME.$HOST_HOSTNAME $CONTAINER_NAME/" $CONTAINER_ROOTFS/etc/hosts
-sed -i "s/iface eth0 inet dhcp/iface eth0 inet static\n\taddress $CONTAINER_IPV4\n\tnetmask 255.255.255.0\n\tgateway $CONTAINER_IPV4_GATEWAY\n\tdns-nameservers 8.8.8.8 8.8.4.4\n\tdns-search $HOST_HOSTNAME\n\tup iptables-restore < \/etc\/iptables.rules/" $CONTAINER_ROOTFS/etc/network/interfaces
+sed -i "s/iface eth0 inet dhcp/iface eth0 inet static\n\taddress $CONTAINER_IPV4\n\tnetmask 255.255.255.0\n\tgateway $CONTAINER_IPV4_GATEWAY\n\tdns-nameservers 8.8.8.8 8.8.4.4\n\tdns-search $HOST_HOSTNAME\n\t#up iptables-restore < \/etc\/iptables.rules/" $CONTAINER_ROOTFS/etc/network/interfaces
 cat >>$CONTAINER_ROOTFS/etc/network/interfaces <<EOT
 
 iface eth0 inet6 static
 $(echo -e "\t")address $CONTAINER_IPV6
 $(echo -e "\t")netmask 64
 $(echo -e "\t")gateway $CONTAINER_IPV6_GATEWAY
-$(echo -e "\t")up ip6tables-restore < /etc/ip6tables.rules
+$(echo -e "\t")#up ip6tables-restore < /etc/ip6tables.rules
 EOT
 
 cat >$CONTAINER_ROOTFS/etc/iptables.rules <<EOT
@@ -147,7 +148,7 @@ fi
 
 echo "Installing useful packages..."
 
-lxc-attach -q -n $CONTAINER_NAME -- apt-get -qq -y install openssh-server nano bash-completion software-properties-common 1>/dev/null
+lxc-attach -q -n $CONTAINER_NAME -- apt-get -qq -y install openssh-server nano bash-completion software-properties-common iptables 1>/dev/null
 if [ "$?" != "0" ]; then
   echo "FATAL: errors while installing packages."; exit 1
 fi
