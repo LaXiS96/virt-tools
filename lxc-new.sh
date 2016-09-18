@@ -82,7 +82,7 @@ CONTAINER_IPV6="$IPV6_BASE$(echo $CONTAINER_IPV4 | sed 's/\./:/g')"
 CONTAINER_IPV6_GATEWAY="$IPV6_BASE$IPV6_GATEWAY"
 
 sed -i "s/127.0.1.1\s\{0,\}$CONTAINER_NAME/$HOST_IPV4 $CONTAINER_NAME.$HOST_HOSTNAME $CONTAINER_NAME/" $CONTAINER_ROOTFS/etc/hosts
-sed -i "s/iface eth0 inet dhcp/iface eth0 inet static\n\taddress $CONTAINER_IPV4\n\tnetmask 255.255.255.0\n\tgateway $CONTAINER_IPV4_GATEWAY\n\tdns-nameservers 8.8.8.8 8.8.4.4\n\tdns-search $HOST_HOSTNAME\n\t#up iptables-restore < \/etc\/iptables.rules/" $CONTAINER_ROOTFS/etc/network/interfaces
+sed -i "s/iface eth0 inet dhcp/iface eth0 inet static\n\taddress $CONTAINER_IPV4\n\tnetmask 255.255.255.0\n\tgateway $CONTAINER_IPV4_GATEWAY\n\tdns-nameservers 8.8.8.8 8.8.4.4\n\tdns-search $HOST_HOSTNAME\n\t##up iptables-restore < \/etc\/iptables.rules/" $CONTAINER_ROOTFS/etc/network/interfaces
 cat >>$CONTAINER_ROOTFS/etc/network/interfaces <<EOT
 
 iface eth0 inet6 static
@@ -92,18 +92,18 @@ $(echo -e "\t")gateway $CONTAINER_IPV6_GATEWAY
 $(echo -e "\t")#up ip6tables-restore < /etc/ip6tables.rules
 EOT
 
-cat >$CONTAINER_ROOTFS/etc/iptables.rules <<EOT
-*filter
--A INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT
--A INPUT -i lo -j ACCEPT
--A INPUT -p icmp -j ACCEPT
--A INPUT -p tcp -m state --state NEW --dport 22 -j ACCEPT
-
--P INPUT DROP
--P OUTPUT ACCEPT
--P FORWARD ACCEPT
-COMMIT
-EOT
+#cat >$CONTAINER_ROOTFS/etc/iptables.rules <<EOT
+#*filter
+#-A INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT
+#-A INPUT -i lo -j ACCEPT
+#-A INPUT -p icmp -j ACCEPT
+#-A INPUT -p tcp -m state --state NEW --dport 22 -j ACCEPT
+#
+#-P INPUT DROP
+#-P OUTPUT ACCEPT
+#-P FORWARD ACCEPT
+#COMMIT
+#EOT
 cat >$CONTAINER_ROOTFS/etc/ip6tables.rules <<EOT
 *filter
 -A INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT
