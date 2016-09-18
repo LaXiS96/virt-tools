@@ -1,6 +1,12 @@
 #!/bin/bash
 # If no release and arch arguments are passed, Ubuntu trusty amd64 is assumed
 
+IPV4_BASE="10.5.1."
+IPV4_GATEWAY="254"
+IPV6_BASE="2a01:4f8:161:6329:"
+IPV6_GATEWAY=":f00d"
+HOST_HOSTNAME="s.laxis.it"
+
 if [ "$(id -u)" != "0" ]; then
   echo "Please run me as superuser!" 1>&2
   exit 1
@@ -9,8 +15,7 @@ fi
 while [ $# -gt 1 ]; do
   case $1 in
     -n|--name) CONTAINER_NAME="$2"; shift;;
-    -a|--address) CONTAINER_ADDRESS="$2"; shift;;
-    -g|--gateway) CONTAINER_GATEWAY="$2"; shift;;
+    -a|--last-octet) CONTAINER_LAST_OCTET="$2"; shift;;
     -r|--release) CONTAINER_RELEASE="$2"; shift;;
     -c|--arch) CONTAINER_ARCH="$2"; shift;;
   esac
@@ -20,11 +25,8 @@ done
 if [ -z "$CONTAINER_NAME" ]; then
   echo "FATAL: missing container name. (specify with -n <name>)"; exit 1
 fi
-if [ -z "$CONTAINER_ADDRESS" ]; then
-  echo "FATAL: missing container address. (specify with -a <#.#.#.#>)"; exit 1
-fi
-if [ -z "$CONTAINER_GATEWAY" ]; then
-  echo "FATAL: missing container gateway. (specify with -g <#.#.#.#>)"; exit 1
+if [ -z "$CONTAINER_LAST_OCTET" ]; then
+  echo "FATAL: missing container address. (specify with -a <last decimal octet>)"; exit 1
 fi
 if [ -z "$CONTAINER_RELEASE" ]; then
   CONTAINER_RELEASE="trusty"
@@ -33,10 +35,10 @@ if [ -z "$CONTAINER_ARCH" ]; then
   CONTAINER_ARCH="amd64"
 fi
 
-HOST_ADDRESS="$(wget -q -O- http://ipinfo.io/ip/)"
-if [ -z "$HOST_ADDRESS" ]; then
-  echo "NOTICE: could not retrieve host's external IP address."
-  echo -n "Please enter the host's external IP address: "; read -e HOST_ADDRESS
+HOST_IPV4="$(wget -q -O- http://ipinfo.io/ip/)"
+if [ -z "$HOST_IPV4" ]; then
+  echo "NOTICE: could not retrieve host's external IPv4 address."
+  echo -n "Please enter the host's external IPv4 address: "; read -e HOST_IPV4
 fi
 
 echo -e "Creating container \"$CONTAINER_NAME\"..."
@@ -74,8 +76,19 @@ chown -R 100000:100000 $CONTAINER_ROOTFS/root/.ssh
 
 echo "Setting up container connectivity..."
 
-sed -i "s/127.0.1.1\s\{0,\}$CONTAINER_NAME/$HOST_ADDRESS $CONTAINER_NAME.s.laxis.it $CONTAINER_NAME/" $CONTAINER_ROOTFS/etc/hosts
-sed -i "s/iface eth0 inet dhcp/iface eth0 inet static\n\taddress $CONTAINER_ADDRESS\n\tnetmask 255.255.255.0\n\tgateway $CONTAINER_GATEWAY\n\tdns-nameservers 8.8.8.8 8.8.4.4\n\tdns-search s.laxis.it/" $CONTAINER_ROOTFS/etc/network/interfaces
+CONTAINER_IPV4="$IPV4_BASE$CONTAINER_LAST_OCTET"
+CONTAINER_IPV4_GATEWAY="$IPV4_BASE$IPV4_GATEWAY"
+CONTAINER_IPV6="$IPV6_BASE$(echo $CONTAINER_IPV4 | sed 's/\./:/g')"
+CONTAINER_IPV6_GATEWAY="$IPV6_BASE$IPV6_GATEWAY"
+sed -i "s/127.0.1.1\s\{0,\}$CONTAINER_NAME/$HOST_IPV4 $CONTAINER_NAME.$HOST_HOSTNAME $CONTAINER_NAME/" $CONTAINER_ROOTFS/etc/hosts
+sed -i "s/iface eth0 inet dhcp/iface eth0 inet static\n\taddress $CONTAINER_IPV4\n\tnetmask 255.255.255.0\n\tgateway $CONTAINER_IPV4_GATEWAY\n\tdns-nameservers 8.8.8.8 8.8.4.4\n\tdns-search s.laxis.it/" $CONTAINER_ROOTFS/etc/network/interfaces
+cat >$CONTAINER_ROOTFS/etc/network/interfaces <<EOT
+
+iface eth0 inet6 static
+$(echo -e "\t")address $CONTAINER_IPV6
+$(echo -e "\t")netmask 64
+$(echo -e "\t")gateway $CONTAINER_IPV6_GATEWAY
+EOT
 
 lxc-start -q -n "$CONTAINER_NAME" -d
 echo "Waiting 10 seconds for container to start..."
@@ -115,5 +128,5 @@ if [ "$?" != "0" ]; then
 fi
 
 echo
-echo -e "Done!\nYou can now access the container with: ssh root@$CONTAINER_ADDRESS"
+echo -e "Done!\nYou can now access the container with: ssh root@$CONTAINER_LAST_OCTET"
 #echo -e "If you need global IPv6 access in your container, look in $CONTAINER_DIR/pre-start.sh and post-stop.sh"
