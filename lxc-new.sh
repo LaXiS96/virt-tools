@@ -82,7 +82,7 @@ CONTAINER_IPV6="$IPV6_BASE$(echo $CONTAINER_IPV4 | sed 's/\./:/g')"
 CONTAINER_IPV6_GATEWAY="$IPV6_BASE$IPV6_GATEWAY"
 sed -i "s/127.0.1.1\s\{0,\}$CONTAINER_NAME/$HOST_IPV4 $CONTAINER_NAME.$HOST_HOSTNAME $CONTAINER_NAME/" $CONTAINER_ROOTFS/etc/hosts
 sed -i "s/iface eth0 inet dhcp/iface eth0 inet static\n\taddress $CONTAINER_IPV4\n\tnetmask 255.255.255.0\n\tgateway $CONTAINER_IPV4_GATEWAY\n\tdns-nameservers 8.8.8.8 8.8.4.4\n\tdns-search $HOST_HOSTNAME\n\tup iptables-restore < \/etc\/iptables.rules/" $CONTAINER_ROOTFS/etc/network/interfaces
-cat >$CONTAINER_ROOTFS/etc/network/interfaces <<EOT
+cat >>$CONTAINER_ROOTFS/etc/network/interfaces <<EOT
 
 iface eth0 inet6 static
 $(echo -e "\t")address $CONTAINER_IPV6
