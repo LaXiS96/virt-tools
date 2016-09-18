@@ -153,6 +153,11 @@ if [ "$?" != "0" ]; then
   echo "FATAL: errors while installing packages."; exit 1
 fi
 
+echo "Activating iptables and rebooting..."
+
+lxc-attach -q -n $CONTAINER_NAME -- sed -i "s/#up ip/up ip/" /etc/network/interfaces
+lxc-attach -q -n $CONTAINER_NAME -- reboot
+
 echo
 echo -e "Done!\nYou can now access the container with: ssh root@$CONTAINER_IPV4"
 #echo -e "If you need global IPv6 access in your container, look in $CONTAINER_DIR/pre-start.sh and post-stop.sh"
