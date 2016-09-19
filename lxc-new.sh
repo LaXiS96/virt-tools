@@ -4,7 +4,8 @@
 IPV4_BASE="10.5.1."
 IPV4_GATEWAY="254"
 IPV6_BASE="2a01:4f8:161:6329:"
-IPV6_GATEWAY=":f00d"
+IPV6_GATEWAY=":501:f00d"
+IPV6_PREFIX="112"
 HOST_HOSTNAME="s.laxis.it"
 
 if [ "$(id -u)" != "0" ]; then
@@ -87,7 +88,7 @@ cat >>$CONTAINER_ROOTFS/etc/network/interfaces <<EOT
 
 iface eth0 inet6 static
 $(echo -e "\t")address $CONTAINER_IPV6
-$(echo -e "\t")netmask 112
+$(echo -e "\t")netmask $IPV6_PREFIX
 $(echo -e "\t")gateway $CONTAINER_IPV6_GATEWAY
 $(echo -e "\t")#up ip6tables-restore < /etc/ip6tables.rules
 EOT
