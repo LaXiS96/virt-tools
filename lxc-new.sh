@@ -87,7 +87,7 @@ cat >>$CONTAINER_ROOTFS/etc/network/interfaces <<EOT
 
 iface eth0 inet6 static
 $(echo -e "\t")address $CONTAINER_IPV6
-$(echo -e "\t")netmask 64
+$(echo -e "\t")netmask 112
 $(echo -e "\t")gateway $CONTAINER_IPV6_GATEWAY
 $(echo -e "\t")#up ip6tables-restore < /etc/ip6tables.rules
 EOT
