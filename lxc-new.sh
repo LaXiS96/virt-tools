@@ -67,6 +67,8 @@ fi
 if [ ! -f "$HOME/.ssh/id_rsa" ]; then
   echo -n "Generating SSH keypair..."
   ssh-keygen -q -t rsa -N "" -f $HOME/.ssh/id_rsa
+  chown $USER:$USER $HOME/.ssh/id_rsa $HOME/.ssh/id_rsa.pub
+  chmod 600 $HOME/.ssh/id_rsa
   echo " done!"
 fi
 mkdir -p $CONTAINER_ROOTFS/root/.ssh
